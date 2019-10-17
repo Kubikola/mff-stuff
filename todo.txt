@@ -1,22 +1,22 @@
-Pracuji na 
-
---Všechny hráči s počtem odehraných utkání celkově, jako náhradníci a poměr
-create or alter view [dbo].Hráči_Odehrané_Zápasy
-as
-select [Reg. č.], Jméno, Příjmení, Pohlaví, [Hráčská kat.], Email, [Tel. číslo], COUNT(Hráč_Soupiska.Hráč_Reg_Id) as 'Počet odehraných utkání' from Hráči
-join Hráč_Soupiska on Hráč_Soupiska.Hráč_Reg_Id = [Reg. č.]
-join Utkání on Utkání.Soupiska_Id = Hráč_Soupiska.Soupiska_Id
-group by [Reg. č.], Jméno, Příjmení, Pohlaví, [Hráčská kat.], Email, [Tel. číslo]
-
-je treba napsat funkci, ktera dostane @reg_id a vrati pocet odehranych zapasu, jako nahradnik a jako v zakladu
-
-z toho potom vypocitam pomer
-
-
 Views
 	- Hraci podle kategorii/pohlavi
-	- Hraci podle poctu odehranych zapasu
-	- Hraci podle poctu kolikrat byl nahradnik
+
+(Kategorie s poctem odehranych zapasu)
+(Kluby s poctem evidovanych hracu)
+
+
+utkani
+	Skore
+	Souper Nazev klubu
+	Doma / Venku
+	Adresa Konani
+	Ml. kategorie formatovane
+	sezona start
+	sezona konec
+	standardni informace o rozhodcim (jmeno, prijmeni, email, telefon)
+	soupiska (x/y kde x je pocet hracu v zakladu a y je pocet hracu na stridani)
+	
+
 
 	
 
