@@ -13,32 +13,142 @@
 	// allow access to context 
 	// CHANGE THIS LINE TO #include "du3456g.hpp" WHEN THIS FILE IS COPIED TO du3456l.lex
 	#include "dummyg.hpp"
+
+	//necessary for calling C++ routines for du2
+	#include "du12sem.hpp"
+
+	#include <string>
 %}
+
+%x comment
+%x str
+%x array
 
 /* DO NOT TOUCH THIS OPTIONS! */
 %option noyywrap nounput batch noinput stack reentrant
 %option never-interactive
 
-WHITESPACE[ \r\t\f]
+WHITESPACE [ \r\t\f]
 IDENTIFIER [a-zA-Z][a-zA-Z0-9]*
 DIGIT [0-9]
-
 PM [+-]
+
+REAL {DIGIT}+"."{DIGIT}*(?i:e){PM}?{DIGIT}+|{DIGIT}+(?i:e){PM}?{DIGIT}+|{DIGIT}+"."{DIGIT}*
+UINT {DIGIT}+ 
 
 %%
 
 %{
 	typedef yy::mlaskal_parser parser;
+
+	using std::atoi;
+	using std::stod;
+	using std::string;
+	using std::out_of_range;
+
+	int brackets_balance = 0;
+
+	string text;
 %}
 
-{DIGIT}+"."{DIGIT}*(?i:e){PM}?{DIGIT}+|{DIGIT}+(?i:e){PM}?{DIGIT}+|{DIGIT}+"."{DIGIT}* {
-	return parser::make_REAL(mlc::ls_real_index(), ctx->curline);
+<comment,INITIAL>"{" {
+	++brackets_balance;
+	BEGIN(comment);
 }
 
+<comment>"}" {
+	--brackets_balance;
+	if(!brackets_balance) 
+		BEGIN(INITIAL);
+}
 
-{DIGIT}+	{
-			    return parser::make_UINT(mlc::ls_int_index(), ctx->curline);
+<comment><<EOF>> {
+	message(mlc::err_code::DUERR_EOFINCMT, ctx->curline);
+	return parser::make_EOF(ctx->curline);
+}
+
+<str>"''" {
+	text += "'";
+}
+
+<INITIAL>"'" {
+	BEGIN(str);
+	text = "";
+}
+
+<str>"'" {
+	BEGIN(INITIAL);
+	return parser::make_STRING(ctx->tab->ls_str().add(text), ctx->curline);
+}
+
+<str>"\n" {
+	message(mlc::err_code::DUERR_EOLINSTRCHR, ctx->curline);	
+	BEGIN(INITIAL);
+	return parser::make_STRING(ctx->tab->ls_str().add(text), ctx->curline++);
+
+}
+
+<str><<EOF>> {
+	message(mlc::err_code::DUERR_EOFINSTRCHR, ctx->curline);
+	return parser::make_EOF(ctx->curline);
+}
+
+<str>. {
+	text += yytext;
+}
+
+<comment>. 
+
+"}" {
+	message(mlc::DUERR_UNEXPENDCMT, ctx->curline);
+}
+
+<INITIAL>{REAL}{IDENTIFIER} {
+	auto [m, _] = mlc::LexUtils::split_real_identifier(yytext, yyleng);
+	message(mlc::err_code::DUERR_BADREAL, ctx->curline, yytext);
+	double d;
+	try {
+		d = stod(yytext);
+	}
+	catch(out_of_range const &) {
+		message(mlc::err_code::DUERR_REALOUTRANGE, ctx->curline, yytext);
+	}
+	return parser::make_REAL(ctx->tab->ls_real().add(d), ctx->curline);
+}
+
+<INITIAL,array>{UINT}{IDENTIFIER} {
+	auto [m, _] = mlc::LexUtils::split_uint_identifier(yytext, yyleng);
+	message(mlc::err_code::DUERR_BADINT, ctx->curline, yytext);
+
+	auto [n, ok] = mlc::LexUtils::uint_parse(m);
+	if(!ok) 
+		message(mlc::err_code::DUERR_INTOUTRANGE, ctx->curline, yytext);
+
+	return parser::make_UINT(ctx->tab->ls_int().add(n), ctx->curline);
+}
+
+{REAL} {
+	double d;
+	try {
+		d = stod(yytext);
+	}
+	catch(out_of_range const &) {
+		message(mlc::err_code::DUERR_REALOUTRANGE, ctx->curline, yytext);
+	}
+	return parser::make_REAL(ctx->tab->ls_real().add(d), ctx->curline);
+}
+
+<INITIAL,array>{UINT} {
+			    auto [n, ok] = mlc::LexUtils::uint_parse(yytext);
+				if(!ok) 
+					message(mlc::err_code::DUERR_INTOUTRANGE, ctx->curline, yytext);
+
+			    return parser::make_UINT(ctx->tab->ls_int().add(n), ctx->curline);
 			}
+
+<array>".." {
+	return parser::make_DOTDOT(ctx->curline);
+}
 
 ";" {
 		return parser::make_SEMICOLON(ctx->curline);
@@ -120,10 +230,6 @@ PM [+-]
 	return parser::make_DO(ctx->curline);
 }
 
-".." {
-	return parser::make_DOTDOT(ctx->curline);
-}
-
 (?i:for) {
 	return parser::make_FOR(ctx->curline);
 }
@@ -152,11 +258,13 @@ PM [+-]
 	return parser::make_RECORD(ctx->curline);
 }
 
-"{" {
+"[" {
+	BEGIN(array);
 	return parser::make_LSBRA(ctx->curline);
 }
 
-"}" {
+<array>"]" {
+	BEGIN(INITIAL);
 	return parser::make_RSBRA(ctx->curline);
 }
 
@@ -228,12 +336,16 @@ PM [+-]
 	return parser::make_FOR_DIRECTION(mlc::DUTOKGE_FOR_DIRECTION::DUTOKGE_DOWNTO, ctx->curline);
 }
 
-
 {IDENTIFIER} {
-			   return parser::make_IDENTIFIER(mlc::ls_id_index(), ctx->curline);
+		       string id_upC = mlc::LexUtils::toUpperCase(yytext);
+			   return parser::make_IDENTIFIER(ctx->tab->ls_id().add(id_upC), ctx->curline);
 	       }
 
-{WHITESPACE}+		
+<INITIAL,comment,array>{WHITESPACE}+		/* go out with whitespaces */
+
+<INITIAL,comment,array>"\n" {
+	++ctx->curline;
+}
 
 .			message(mlc::DUERR_UNKCHAR, ctx->curline, *yytext, *yytext);
 
