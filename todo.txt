@@ -1,3 +1,14 @@
+Dle me jsou indexy, kde maji byt.
+Views jsou optimalizovane stejne jako funkce, procedury a triggery.
+Snad nikde neni zadny bug nebo nejaka inefficiency.
+
+Chtelo by to nejak decetne to projet a vyzkouset.
+
+Dále by bylo treba projit si detailne Kopeckeho pozadavky, jestli je splnuji a na neco jsem nezapomnel. 
+
+Jinak je skoro na case sepisovat nejakou "dokumentaci" a migrovat databazi do odevzdavaci podoby.
+
+
 Kde neni index, protoze neni treba
 	hostovani index na clenstvi
 		nevybiram nazev klubu u hostovani hrace ve view
