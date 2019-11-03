@@ -16,14 +16,14 @@ Konkrétně se jedná o funkce:
 	FUNCTION dbo.Je_Kontakt_Využit
 
 Popis:
-Cílem práce bylo vytvořit databázi pro fotbalový klub. Tj. z pohledu fotbalové klubu, nikoliv z pohledu 
-fotbalové asosiace, která zastřešuje všechny kluby.
+Cílem práce bylo vytvořit databázi pro fotbalový klub. Tj. z pohledu fotbalového klubu, nikoliv z pohledu 
+fotbalové asociace, která zastřešuje všechny kluby.
 
 Databáze eviduje jednotlivé hráče, kteří mohou být buďto členem klubu za který hrají, nebo hrát na hostování.
-V případě hostování jsou uloženy informace o délce platnosti hostování, případně rovnou smlouva. 
+V případě hostování jsou uloženy informace o délce platnosti hostování, případně smlouva. 
 
 Hráči jsou různého věku a pohlaví, v databázi jsou uloženy jednotlivé hráčské kategorie. Samozřejmností jsou
-utkání, která mimo jiné obsahují soupisku hráčů, rozhodčího a sezónu, ve které do utkání odehrálo.
+utkání, která mimo jiné obsahují soupisku hráčů, rozhodčího a sezónu, ve které se utkání odehrálo.
 
 
 Nad definicí každé tabulky se nachází popis potencionálně nejasných parametrů, případný popis významu celé tabulky.
@@ -42,7 +42,7 @@ GO
 
 /*
 Sezóna je definovaná dvojcí datumů (Start, Konec). Netrvá déle než jeden rok a Start <= Konec.
-Sloupce Start_Rok a Konec_Rok obsahují pouze rok z odpovídajícího datumu. Jsou přítomny pouze,
+Sloupce Start_Rok a Konec_Rok obsahují pouze rok z odpovídajícího datumu, ty jsou přítomny,
 protože na ně bude vytvořen index (built-in funkce year není sargovatelná), 
 více viz. trigger dbo.Validní_Sezóna (na tabulce Sezóna).
 */
@@ -83,9 +83,9 @@ GO
 Standardní kontaktní informace, které si chceme uložit o jednotlivé osobě v DB.
 
 Využit
-	- Bit značící jestli má kontakt nějaký hlubší význam, než je data (rozhodčí, hráč, zapisovatel soupisek, správce klubu)
-	- Výchozí chování je, že při smazání významu kontaktu se nesmažou kontaktní data
-	- Pro vyčištění neyužitých kontaktů je připravena procedůra dbo.Smaž_Nevyužité_Kontakty, která tento sloupec využívá
+	- Bit značící jestli má kontakt nějaký hlubší význam, než jen data (rozhodčí, hráč, zapisovatel soupisek, správce klubu)
+	- Výchozí chování je, že při smazání významu kontaktu pomocí procedůry (dbo.Smaž_Hráče, ...) se nesmažou kontaktní data
+	- Pro vyčištění nevyužitých kontaktů je připravena procedůra dbo.Smaž_Nevyužité_Kontakty, která tento sloupec využívá
 	- Bohužel nejde vytvořit index na sloupec, pro jehož spočítání se musí udělat select do DB 
 	  (podívat se jestli existuje nějaká role ke kontaktu) a tedy dbo.Smaž_Nevyužité_Kontakty vždy provede clustered index scan
 
@@ -117,12 +117,12 @@ CREATE TABLE dbo.Kontakt (
 GO
 
 /* 
-Každý klub (viz následující definice tabulky) má asociovanou právě jednu adresu.
+Každý klub (viz tabulka následující po dbo.Adresa) má asociovanou právě jednu adresu.
 
 Využita
 	- Obdobný případ jako u sloupce Kontakt(Využit)
 	- Bit značící jestli je Adresa adresou klubu
-	- Výchozí chování je, že při smazání klubu se nesmaže adresa v DB.
+	- Výchozí chování je, že při smazání klubu procedůrou dbo.Smaž_Klub se nesmaže adresa v DB.
 	- Pro vyčištění neyužitých adres je připravena procedůra dbo.Smaž_Nevyužité_Adresy, která tento sloupec využívá
 	- Bohužel nejde vytvořit index na sloupec, pro jehož spočítání se musí udělat select do DB 
 	  (podívat se jestli k adrese existuje klub) a tedy dbo.Smaž_Nevyužité_Adresy vždy provede clustered index scan
@@ -183,7 +183,7 @@ Soupiska hráčů.
 Spojení soupisky a hráčů bude následovat v tabulce Hráč_Soupiska
 
 Ačkoliv je NULL hodnota povolena u zapisovatele soupisky, tak předpokládáme, že bude spíše výjimkou,
-když nebudeme vědět kdo zapsat soupisku. Proto není Zapsal_Id definován jako SPARSE NULL.
+když nebudeme vědět, kdo zapsal soupisku. Proto není Zapsal_Id definován jako SPARSE NULL.
 */
 CREATE TABLE dbo.Soupiska (
 	Id INT IDENTITY(1,1) NOT NULL
@@ -228,13 +228,13 @@ soupeře (Soupeř_Id) proti kterému utkání proběhlo. Dále Soupiska_Id ident
 o soupisce soupeře nic nevíme.
 
 Góly_My
-	- Počet vstřelených gólu na konci utkání našim týmem
+	- Počet vstřelených gólu na konci utkání naším týmem
 
 Góly_Soupeř
 	- Počet vstřelených gólu na konci utkání soupeřem
 
 Góly_My_Poločas
-	- Počet vstřelených gólu našim týmem o poločase
+	- Počet vstřelených gólu naším týmem o poločase
 
 Góly_Soupeř_Poločas
 	- Počet vstřelených gólů soupeřem o poločase
@@ -251,7 +251,7 @@ Ml_Kategorie_Název, Ml_Kategorie_Muži
 	  viz trigger dbo.Validní_Soupiska ON dbo.Utkání
 
 Seźona_Start
-	- Identifikace sezóny, ve kterou se utkání odehrálo
+	- Identifikace sezóny, ve které se utkání odehrálo
 
 Soupiska_Id
 	- Soupiska mého klubu 
@@ -316,7 +316,7 @@ Muž
 	- 1 ~ mužské pohlaví
 	- 0 ~ ženské pohlaví
 */
-CREATE TABLE dbo.Hráč(
+CREATE TABLE dbo.Hráč (
 	Reg_Id NVARCHAR(7) NOT NULL
   ,	D_Narození DATE NOT NULL
   ,	Muž BIT NOT NULL
@@ -359,7 +359,7 @@ Od, Do
 	- Vymezuje platnost hostovací smlouvy
 
 Cena_Za_Sezónu
-	- Smluvená částka / sezona
+	- Smluvená částka / sezóna
 
 Smlouva
 	- binární soubor (kopie smlouvy)

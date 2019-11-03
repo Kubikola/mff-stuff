@@ -20,7 +20,7 @@ begin
 	if @@ROWCOUNT > 0
 	begin
 		raiserror('Dvě hostování mají neprázdný průnik', 15, 15)
-		rollback;
+		rollback
 	end
 end
 GO
@@ -37,8 +37,8 @@ begin
 
 	if @@ROWCOUNT > 0
 	begin
-		raiserror('Duplicitní číslo dresu', 15, 15);
-        rollback;
+		raiserror('Duplicitní číslo dresu', 15, 15)
+        rollback
 	end
 
 	-- Kontrola maximálního počtu náhradníků (7)
@@ -49,11 +49,11 @@ begin
 
 	if @@ROWCOUNT > 0
 	begin
-		raiserror('Dosaženo maximálního počtu náhradníků', 15, 15);
-		rollback;
+		raiserror('Dosaženo maximálního počtu náhradníků', 15, 15)
+		rollback
 	end
 
-	-- Kontrola maximální počtu hráčů na soupisce (18)
+	-- Kontrola maximálního počtu hráčů na soupisce (18)
 	-- Tím zkontroluji, že mám max. 11 hráčů v základu.
 	select Soupiska_Id from Hráč_Soupiska
 	where Soupiska_Id in (select Soupiska_Id from inserted)
@@ -62,8 +62,8 @@ begin
 
 	if @@ROWCOUNT > 0
 	begin
-		raiserror('Soupiska již obsahuje maximální počet hráčů', 15, 15);
-		rollback;
+		raiserror('Soupiska již obsahuje maximální počet hráčů', 15, 15)
+		rollback
 	end
 
 	--Kontrola výskytu hráčů jedné kategorie (věk, pohlaví)
@@ -77,8 +77,8 @@ begin
 
 	if @@ROWCOUNT > 0
 	begin
-		raiserror('Pokus o přidání hráče z jiné kategorie', 15, 15);
-		rollback;
+		raiserror('Pokus o přidání hráče z jiné kategorie', 15, 15)
+		rollback
 	end
 end
 GO
@@ -97,8 +97,8 @@ begin
 	having COUNT(*) < 7
 	if @@ROWCOUNT > 0 
 	begin
-		raiserror('Existuje utkání, které tuto soupisku obsahuje, není možné ji znevalidnit', 15, 15);
-		ROLLBACK;
+		raiserror('Existuje utkání, které tuto soupisku obsahuje, není možné ji znevalidnit', 15, 15)
+		ROLLBACK
 	end
 end
 GO
@@ -108,12 +108,12 @@ create trigger dbo.Kontrola_Mazání_Klubu on dbo.Klub
 after delete
 as
 begin
-	declare @vyuzito int;
+	declare @vyuzito int
 	select @vyuzito = COUNT(*) from Utkání where Místo_Konání_Id IN (select Adresa_Id from deleted)
 	if @vyuzito > 0
 	begin
-		raiserror('Klub, na jehož adrese se odehrálo utkání nemůže být smazán z DB',15,15);
-		rollback;
+		raiserror('Klub, na jehož adrese se odehrálo utkání nemůže být smazán z DB',15,15)
+		rollback
 	end
 end
 GO
@@ -156,7 +156,7 @@ begin
 	if @@ROWCOUNT > 0
 	begin
 		raiserror('Vložená sezóna začíná v roce, kdy začíná i jiná', 15, 15)
-		rollback;
+		rollback
 	end
 
 	select Konec_Rok from Sezóna where Start not in (select Start from inserted) and Konec_Rok in (select Konec_Rok from inserted)
@@ -166,7 +166,7 @@ begin
 	if @@ROWCOUNT > 0
 	begin
 		raiserror('Vložená sezóna končí v roce, kdy končí i jiná', 15, 15)
-		rollback;
+		rollback
 	end
 end
 GO
@@ -183,8 +183,8 @@ begin
 
 	if @@ROWCOUNT > 0
 	begin
-		raiserror('Soupiska neobsahuje minimální počet hráčů', 15, 15);
-		rollback;
+		raiserror('Soupiska neobsahuje minimální počet hráčů', 15, 15)
+		rollback
 	end
 
 	-- Kontrola, zda-li je přiřazována správná kategorie hráčů na utkání
@@ -199,8 +199,8 @@ begin
 
 	if @@ROWCOUNT > 0
 	begin
-		raiserror('Utkání je pro jinou kategorii, než je soupiska', 15, 15);
-		rollback;
+		raiserror('Utkání je pro jinou kategorii, než je soupiska', 15, 15)
+		rollback
 	end
 
 	--Kontrola zda-li na adrese, kde se utkání koná sídlí nějaký klub
@@ -209,7 +209,7 @@ begin
 
 	if @@ROWCOUNT > 0
 	begin
-		raiserror('Utkání se nemůže odehrát na adrese, kde nesídlí žádný klub', 15, 15);
-		rollback;
+		raiserror('Utkání se nemůže odehrát na adrese, kde nesídlí žádný klub', 15, 15)
+		rollback
 	end
 end

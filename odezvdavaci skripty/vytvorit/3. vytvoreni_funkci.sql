@@ -267,7 +267,7 @@ begin
 end
 GO
 
---Pro reg_id hráče vrátí dvojci (název, pohlaví) ml. kategorie, do které patří
+--Pro reg_id (@hrac_id) hráče vrátí dvojci (název, pohlaví) ml. kategorie, do které patří
 CREATE function dbo.Urči_Ml_Kategorii_Pohlaví(@hrac_id nvarchar(7))
 returns @kategorie table
 (

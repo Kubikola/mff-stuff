@@ -12,7 +12,7 @@ Nevynucoval jsem seeky ( pomocí with (forceseek) ), protože v malém množstv�
 USE Levý_Fotbal 
 GO
 
---Všechny kontakty, kteří nejsou ani jedno z následujících: hráč, zapisovatel soupisky, rozhodčí, pověřená osoba klubu (správce)
+--Všechny kontakty, které nejsou ani jedno z následujících: hráč, zapisovatel soupisky, rozhodčí, pověřená osoba klubu (správce)
 create view dbo.Nevyužité_Kontakty
 as
 select Jméno, Příjmení, Email, dbo.Tel_Číslo(Tel_Id) as 'Tel. číslo' from Kontakt where dbo.Je_Kontakt_Využit(Id) = 0
@@ -145,7 +145,7 @@ left outer join Klub on Klub.Adresa_Id = Adresa.Id
 group by Klub.Název, Ulice, Č_p, Město, Psč
 GO
 
---Jednotlivý rozhodčí s počtem odpískaných utkání
+--Jednotliví rozhodčí s počtem odpískaných utkání
 create view dbo.Rozhodčí_Počet_Odpískaných_Utkání
 as
 --NULL v sloupci Místo znamená, že na dané adrese, kde se utkání odehrávalo nesídlí žádný klub
@@ -187,7 +187,7 @@ join Adresa on Adresa.Id = Klub.Adresa_Id
 join Kontakt on Kontakt.Id = Klub.Pověřená_Osoba_Id
 GO
 
---Jednotlivý hráči s informacemi o jejich hostování
+--Jednotliví hráči s informacemi o jejich hostování
 CREATE view dbo.Hráči_Hostování
 as
 select 
@@ -201,7 +201,7 @@ GO
 --Lepší pohled na fotbalové utkání než tabulka Utkání
 --Kromě připojených tabulek podle id navíc obsahuje:
 	--Formátované skóre (dbo.Skóre)
-	--Doma/Venku (určeno s místa, kde se utkání odehrálo)
+	--Doma/Venku (určeno z místa, kde se utkání odehrálo)
 CREATE view dbo.Zápas as
 select dbo.Skóre(Góly_My, Góly_Soupeř, Góly_My_Poločas, Góly_Soupeř_Poločas) as 'Skóre' 
 	 , Název as 'Soupeř', dbo.Doma_Venku(Místo_Konání_Id, Soupeř_Id) as 'Místo',Ulice, Č_p as 'Č. p.', Město, Psč 

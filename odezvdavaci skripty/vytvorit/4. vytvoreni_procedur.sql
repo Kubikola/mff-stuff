@@ -64,8 +64,8 @@ begin
 end
 GO
 
---Hráči, kteří mají nějaký záznam o hostování jsou považovány za hráče hrající na hostování.
---Hráči, kteří nemají žádný záznam o hostování jsou považovány za hráče klubu, který je vlastní.
+--Hráči, kteří mají nějaký záznam o hostování jsou považováni za hráče hrající na hostování.
+--Hráči, kteří nemají žádný záznam o hostování jsou považováni za hráče klubu, který je vlastní.
 --Tato funkce smaže všechny staré záznamy o hostování a převede hráče do vlastnictví klubu.
 --V připadě, že hráč má platné hostování dojde k výjimce.
 --@reg_id ~ registrační číslo hráče
@@ -93,7 +93,7 @@ end
 GO
 
 --Vytvoří nové hostování, 
---@smlouva_soubor_cesta reprezentuje cestu ke souboru smlouvy 
+--@smlouva_soubor_cesta reprezentuje cestu k souboru smlouvy 
 create procedure dbo.Přidej_Hostování(@kontrakt_id nvarchar(15), @od date, @do date, @cena_za_sezonu money 
 							   	    , @hrac_reg_id nvarchar(7), @clenstvi_id int
 									, @smlouva_soubor_cesta nvarchar(max) = null)
@@ -162,9 +162,9 @@ GO
 
 --Přidá nového hráče včetně kontaktních informací
 --Procedura selže, pokud není dodán email, tel. číslo nebo oboje
-CREATE procedure dbo.Přidej_Hráče(@reg_id nvarchar(7), @jmeno nvarchar(30), @prijmeni nvarchar(30), 
-								  @pohlavi nvarchar(6), @d_nar date, @email nvarchar(50) = null, 
-								  @tel_cislo nvarchar(9) = null, @predvolba nvarchar(4) = null)
+CREATE procedure dbo.Přidej_Hráče(@reg_id nvarchar(7), @jmeno nvarchar(30), @prijmeni nvarchar(30) 
+							    , @pohlavi nvarchar(6), @d_nar date, @email nvarchar(50) = null 
+								, @tel_cislo nvarchar(9) = null, @predvolba nvarchar(4) = null)
 as
 begin
 	declare @pohlavi_bit bit
@@ -311,7 +311,7 @@ begin
 end
 GO
 
---Smaže kontakt včetně telefoního čísla (trigger Smaž_Tel)
+--Smaže kontakt včetně telefoního čísla (trigger Smaž_Tel ON dbo.Kontakt)
 create procedure dbo.Smaž_Kontakt(@kontakt_id int)
 as
 begin
