@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using _117raster.ModuleHSV;
@@ -39,7 +41,7 @@ namespace Modules
     /// <summary>
     /// Default mode - gray.
     /// </summary>
-    protected string param = "";
+    protected string param = "circle 30";
 
     /// <summary>
     /// Current 'Param' string is stored in the module.
@@ -54,6 +56,7 @@ namespace Modules
         {
           param = value;
           dirty = true;     // to recompute histogram table
+
 
           recompute();
         }
@@ -130,14 +133,26 @@ namespace Modules
             hForm = new HSVForm(this);
             hForm.Show();
           }
-
-          recompute();
+          if(dirty)
+            recompute();
         }
         else
         {
           hForm?.Hide();
           hForm = null;
         }
+      }
+    }
+
+    public static T DeepClone<T> (T obj)
+    {
+      using (var ms = new MemoryStream())
+      {
+        var formatter = new BinaryFormatter();
+        formatter.Serialize(ms, obj);
+        ms.Position = 0;
+
+        return (T)formatter.Deserialize(ms);
       }
     }
 
@@ -151,10 +166,12 @@ namespace Modules
       Bitmap inputImage,
       int slot = 0)
     {
-      dirty   = inImage != inputImage;     // to recompute histogram table
-      inImage = inputImage;
+      dirty   = inImage != inputImage;    
+      //inImage = inputImage.Clone(new RectangleF(0,0,inputImage.Width,inputImage.Height), inputImage.PixelFormat);
+      inImage = DeepClone(inputImage);
 
-      recompute();
+      if(dirty)
+        recompute();
     }
 
     /// <summary>
@@ -273,6 +290,7 @@ namespace Modules
       return bmp;
     }
 
+
     /// <summary>
     /// Optional action performed at the given pixel.
     /// Blocking (synchronous) function.
@@ -282,6 +300,8 @@ namespace Modules
       int x,
       int y)
     {
+
+
       if (LocalImage())
       {
         dirty = true;
@@ -300,7 +320,7 @@ namespace Modules
         recompute();
       }
       //    inImageLocal?.Save("C:\\obr.png");
-      
+
     }
 
     /// <summary>

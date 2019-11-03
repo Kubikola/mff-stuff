@@ -82,7 +82,12 @@ namespace _117raster.ModuleHSV
       }
       else
       {
-        e.Graphics.DrawImageUnscaled(backBuffer, 0, 0);
+        try
+        {
+          e.Graphics.DrawImageUnscaled(backBuffer, 0, 0);
+
+        }
+        catch (InvalidOperationException) { }
       }
     }
 

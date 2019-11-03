@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using Utilities;
@@ -33,6 +35,8 @@ namespace Modules
     /// <summary>
     /// Tooltip for Param (text parameters).
     /// </summary>
+    /// circle n, square n definuje type selekce mysi
+    /// 
     public override string Tooltip => "{red[-alt] | green[-alt] | blue[-alt] | gray[-alt]} [circle n|square n] [sort] ";
 
     /// <summary>
@@ -149,9 +153,21 @@ namespace Modules
       int slot = 0)
     {
       dirty   = inImage != inputImage;     // to recompute histogram table
-      inImage = inputImage;
+      inImage = DeepClone(inputImage);
 
       recompute();
+    }
+
+    public static T DeepClone<T> (T obj)
+    {
+      using (var ms = new MemoryStream())
+      {
+        var formatter = new BinaryFormatter();
+        formatter.Serialize(ms, obj);
+        ms.Position = 0;
+
+        return (T)formatter.Deserialize(ms);
+      }
     }
 
     /// <summary>
@@ -269,6 +285,8 @@ namespace Modules
       }
       return bmp;
     }
+
+    private bool lts = false;
 
     /// <summary>
     /// Optional action performed at the given pixel.

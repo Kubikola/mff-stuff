@@ -61,55 +61,15 @@ namespace Utilities
         {
           DataRecomputation(di, graph.Width, graph.Height);
 
-         // Brush b = new SolidBrush(di.Color == "red" ? Color.Red :  di.Color == "green" ? Color.DarkGreen : di.Color == "blue" ? Color.Blue : Color.DarkGray);
-
-
-          //gfx.DrawString(di.Color == "red" ? "Červená" : mode == 1 ? "Zelená" : mode == 2 ? "Červená" : "Stupně šedi", f, b,
-          //graph.Width / 2f, 0, sfCenter);
-
           
 
           // Pens:
           Color c = di.Color == "red" ? Color.Red : (di.Color == "green" ? Color.DarkGreen : (di.Color == "blue" ? Color.Blue : Color.Gray));
-       //   Pen graphPen = new Pen(c);
           Brush graphBrush = new SolidBrush(c);
 
           // Histogram:
           gfx.FillRectangles(graphBrush, di.DrawingPrimitive.Keys.ToArray());
           gfx.DrawRectangles(Pens.Black, di.DrawingPrimitive.Keys.ToArray());
-
-          //if (!sort)
-          //{
-          //  for (int x = 0; x < 256; x++)
-          //  {
-          //    float yHeight = -di.Hist[x] * ky;
-          //    if (di.Alt && yHeight > 3.0)
-          //      yHeight = 3.0f;
-
-          //    gfx.FillRectangle(graphBrush, x0 + x * kx, y0 + di.Hist[x] * ky, kx, yHeight);
-          //    gfx.DrawRectangle(axisPen, x0 + x * kx, y0 + di.Hist[x] * ky, kx, yHeight);
-          //    //gfx.DrawLine(Pens.Black, x0 + x * kx, y0 + histArray[x] * ky, x0 + x * kx, yHeight + y0 + histArray[x] * ky);
-          //  }
-          //}
-
-          //else
-          //{
-          //  var myList = di.Hist.Values.ToList();
-          //  myList.Sort();
-          //  myList.Reverse();
-
-          //  for (int x = 0; x < 256; x++)
-          //  {
-          //    float yHeight = -myList[x] * ky;
-          //    if (di.Alt && yHeight > 3.0)
-          //      yHeight = 3.0f;
-
-          //    gfx.FillRectangle(graphBrush, x0 + x * kx, y0 + myList[x] * ky, kx, yHeight);
-          //    gfx.DrawRectangle(axisPen, x0 + x * kx, y0 + myList[x] * ky, kx, yHeight);
-          //    //gfx.DrawLine(Pens.Black, x0 + x * kx, y0 + histArray[x] * ky, x0 + x * kx, yHeight + y0 + histArray[x] * ky);
-          //  }
-          //}
-
 
 
 
