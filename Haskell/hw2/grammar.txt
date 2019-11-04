@@ -1,0 +1,104 @@
+PLUS '+'
+MINUS '-'
+MULT '*'
+DIV '/'
+ASSIGN '='
+D_QUOTE '"'
+COMMA ','
+COLON ':'
+LPAR '('
+RPAR ')'
+DEF 'def'
+IF 'if'
+ELSE 'else'
+EQ '=='
+LT '<'
+LE '<='
+GT '>'
+GE '>='
+SEMICOLON ';'
+PASS 'pass'
+NEWLINE '\n'
+
+Digit: [0-9]
+
+Nat: Digit+
+
+Neg: MINUS 
+     Digit+
+    
+Int: Neg | Nat
+
+String: D_QUOTE .* D_QUOTE
+      | S_QUOTE .* S_QUOTE
+
+Identifier: [a-zA-Z_][a-zA-Z0-9_]*
+
+Expr: Int
+    | String
+    | Identifier
+    | Expr PLUS Expr
+    | Expr MINUS Expr
+    | Expr MULT Expr
+    | Expr DIV Expr
+    | LPAR Expr RPAR
+    | Assignment
+    | Call
+
+Boolean_Expression: Expr EQ Expr
+                  | Expr LT Expr
+                  | Expr LE Expr
+                  | Expr GT Expr
+                  | Expr GE Expr
+                  | Expr
+
+Method_Header: DEF Identifier LPAR Parameters RPAR COLON
+
+Parameter: Identifier
+
+Parameters: %empty
+          | Identifier
+            Parameters_Next
+
+Parameters_Next: %empty
+               | COMMA
+                 Parameter
+                 Parameters_Next
+
+Assignment: Identifier ASSIGN Expr
+
+Call: Identifier LPAR Parameters RPAR 
+
+Else_Opt: %empty
+        | ELSE Body
+
+Statement: Expr
+         | WHILE Boolean_Expression COLON Body
+         | IF Boolean_Expression COLON Body Else_Opt
+         | Method_Def
+
+Method_Def: Method_Header Body
+
+Body:        INDENT_IN
+             Indent_Statements
+             INDENT_OUT
+            
+Statements_Opt: %empty
+              | Statements
+
+Indent_Statements: PASS
+                 | Statements
+
+Statement_End: NEWLINE   Eat_Newlines_Semicolons
+             | SEMICOLON Eat_Newlines_Semicolons 
+
+Statements: Statement Statement_End Statements_Next
+
+Statements_Next: %empty
+               | Statement Statement_End Statements_Next
+
+Slepýš: Flow
+
+Flow: %empty
+    | Statement Flow
+    | Method_Def Flow

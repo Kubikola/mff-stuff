@@ -1,0 +1,2 @@
+upravit lexer aby parsoval (Token, Int) misto Token
+kde Int je cislo radky, kde se token vyskytuje
