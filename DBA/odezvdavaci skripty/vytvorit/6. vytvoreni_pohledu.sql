@@ -214,12 +214,13 @@ GO
 	--Formátované skóre (dbo.Skóre)
 	--Doma/Venku (určeno z místa, kde se utkání odehrálo)
 create view [dbo].[Zápas] as
-select dbo.Skóre(u.Místo, u.Góly_My, u.Góly_Soupeř, u.Góly_My_Poločas, u.Góly_Soupeř_Poločas) as 'Skóre' 
+select u.Id as 'Id zápasu', dbo.Skóre(u.Místo, u.Góly_My, u.Góly_Soupeř, u.Góly_My_Poločas, u.Góly_Soupeř_Poločas) as 'Skóre' 
 	 , Název as 'Soupeř', u.Místo, Ulice, Č_p as 'Č. p.', Město, Psč 
 	 , dbo.Ml_Kategorie_Formátované(u.Ml_Kategorie_Název, u.Ml_Kategorie_Muži) as 'Hráčská kat.' 
 	 , dbo.Soupiska_Počet_Lidí(u.Soupiska_Id) as 'Počet na soupis.'
 	 , Start as 'Sez. start', Konec as 'Sez. konec', Jméno as 'Jméno rozh.', Příjmení as 'Příjmení rozh.' 
-	 , Email as 'Email rozh.', dbo.Tel_Číslo(Tel_Id) as 'Tel. č. rozh.' from (select Místo_Konání_Id
+	 , Email as 'Email rozh.', dbo.Tel_Číslo(Tel_Id) as 'Tel. č. rozh.' from (select Id
+																			       , Místo_Konání_Id
 																				   , Góly_My
 																				   , Góly_My_Poločas
 																				   , Góly_Soupeř
@@ -236,7 +237,7 @@ join Adresa on Adresa.Id = u.Místo_Konání_Id
 join Sezóna on Sezóna.Start = u.Sezóna_Start
 join Rozhodčí on Rozhodčí.Id = u.Rozhodčí_Id
 join Kontakt on Kontakt.Id = Rozhodčí.Kontakt_Id
-
+go
 
 --Všechny soupisky, na kterých není ani jeden hráč s informace o jejich zapisovateli
 create view Prázdné_Soupisky

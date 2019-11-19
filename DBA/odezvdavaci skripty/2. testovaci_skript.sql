@@ -26,6 +26,7 @@ declare @machov int
 select @machov = Id from Klub where Název = 'VEBA Machov'
 --Hostování nemůže skončit dříve než začně
 exec Přidej_Hostování '10A45XXX12', '2020-02-10', '2020-01-10', 5000, '1650655', @machov
+--Neprošlo
 
 --Constraints tabulky Hráč
 --Uvnitř procedůry Přidej_Hráče se nachází transakce, 
@@ -101,7 +102,7 @@ declare @c1 int
 select @c1 = Id from Klub where Název = 'VEBA Machov'
 exec Přidej_Hostování 'JAM1001EX25', '2013-10-27', '2014-07-17', 35000, '1915044', @c1
 
---Hostování, která má prázdný průnik však projde
+--Hostování, která mají prázdný průnik však projdou
 declare @c2 int
 select @c2 = Id from Klub where Název = 'VEBA Machov'
 exec Přidej_Hostování 'JAM1001EX25', '2009-10-27', '2011-07-17', 35000, '1915044', @c2
@@ -118,7 +119,6 @@ select top 1 @vyuzita_soupiska = Soupiska_Id from Utkání
 delete from Hráč_Soupiska where Soupiska_Id = @vyuzita_soupiska
 
 --Trigger Kontrola_Soupisky na tabulce Hráč_Soupiska
-
 --duplicitní dresy
 declare @ns int
 exec Vytvoř_Prázdnou_Soupisku @soupiska_id = @ns output
@@ -199,6 +199,7 @@ exec Přidej_Hráče_Na_Soupisku '1937981', @ns5, 20, 1 --má smůlu, na soupisk
 --Kontrola, na soupisce je 18 hráčů, poslední dva se na ní nevyskytují
 select * from Hráči_Na_Soupisce where [Id soupisky] IN (select max(Id) from Soupiska)
 
+--Kontrola, že poslední dva hráči tam opravdu nejsou
 select * from Hráči_Na_Soupisce where [Id soupisky] IN (select max(Id) from Soupiska) and ([Reg. č.] = '1094895' or [Reg. č.] = '1937981')
 
 
@@ -235,7 +236,7 @@ select * from Tel where Předvolba = '+44'
 exec Přidej_Kontakt 'James', 'Bond', @tel_cislo = '007007007', @predvolba = '+44'
 --Opět se v tabulce Tel nachází jeho telefonní číslo
 select * from Tel where Předvolba = '+44'
---Nyní se ho pokusíme změnit na nové číslo
+--Nyní se ho pokusíme změnit na nové číslo (divným způsobem, aby staré číslo zůstalo v DB)
 insert into Tel (Předvolba, Číslo) VALUES ('+44', '111111111')
 update Kontakt SET Tel_Id = SCOPE_IDENTITY() where Jméno = 'James' and Příjmení = 'Bond'
 --Opět byli upraveny 2 řádky v DB
@@ -243,7 +244,6 @@ update Kontakt SET Tel_Id = SCOPE_IDENTITY() where Jméno = 'James' and Příjme
 select * from Tel where Předvolba = '+44'
 
 --Trigger na tabulce Utkání
-
 --Nemůžeme vytvořit utkání se soupiskou hráčů, která neobsahuje alespoň minimální počet hráčů (7)
 --Vytvoříme si soupisku s jenom šesti hráči a zkusíme vytvořit utkání
 declare @ns6 int
@@ -271,6 +271,9 @@ select @s2 = Id, @a2 = Klub.Adresa_Id from Klub where Název = 'RSCM Rozkoš'
 exec Přidej_Utkání 5, 3, @s2, @a2, @r2, @sa, 'Muži'
 --Prošlo
 
+--Kontrola
+select * from Zápas where [Id zápasu] IN (select max(Id) from Utkání)
+
 --Kategorie, pro kterou je určené utkání musí být stejné jako kategorie hráčů na soupisce
 --Využijeme validní (čítající pouze 7 hráčů) soupisku z předchozího, jenom zkusíme změnit kategorii z Muži na cokoliv jiného
 declare @sb int 
@@ -284,7 +287,7 @@ exec Přidej_Utkání 5, 3, @s3, @a3, @r3, @sb, 'Mladší žáci'
 --Neprošlo protože hráčí na soupisce spadají pod kategorii Muži, což si můžeme ověřit:
 select * from Hráči_Na_Soupisce where [Id soupisky] IN (select max(Id) from Soupiska)
 
---Kontrola, zda-li na adrese, kde se utkání koná sídlí nějaký klub
+--Kontrola, zda-li na adrese, kde se koná utkání sídlí nějaký klub
 --Utkání se jinde konat nemůže -- kde nesídlí klub není hriště :)
 --Vytvoříme si novou adresu, která nebude asociována s žádným klubem a zkusíme na ní vytvořit utkání
 declare @a4 int
@@ -299,7 +302,7 @@ exec Přidej_Utkání 5, 3, @s4, @a4, @r4, @sc, 'Muži'
 --Neprošlo
 
 --Kontrola, zda-li hráči na soupisce mají validní hostování v sezóně utkání
---Opět využijeme předchozí soupisku, jenom jednomu hráči přidáme hostování, který již nebude
+--Opět využijeme předchozí soupisku, jenom jednomu hráči přidáme hostování, které již nebude
 --aktuální a zkusíme přidat nové utkání
 declare @sol int
 select @sol = Id from Klub where Název = 'SK Solnice'
@@ -315,7 +318,23 @@ exec Přidej_Utkání 5, 3, @s5, @a5, @r5, @sd, 'Muži', @sezona_start = '2019-1
 
 --Test procedůr
 
+--Hostování_Mateřský_Klub
+--Přidáme si do DB dvě nové hráčky, jedné přidáme hostování z TJ Koněpůlek a druhé z SK Solnice
+exec Přidej_Hráče '8742367', 'Kamila', 'Smutná', 'ženské', '2006-02-27', 'k.smutna@deckonachod.cz', '847302298'
+exec Přidej_Hráče '9732367', 'Anna', 'Kutinová', 'ženské', '2006-05-13', 'anicka@kutinova.cz', '273489478'
+declare @par1 int, @sol1 int
+select @par1 = Id from Klub where Název = 'TJ Koněpůlky'
+select @sol1 = Id from Klub where Název = 'SK Solnice'
+exec Přidej_Hostování '45AA502500C', '2012-07-17', '2014-05-15', 5000, '8742367', @par1
+exec Přidej_Hostování '2500X50CC12', '2018-03-21', '2021-01-12', 75000, '9732367', @sol1
 
+--Podíváme se na hráče s hostováním pocházející z klubu TJ Koněpůlky
+exec Hostování_Mateřský_Klub 'TJ Koněpůlky'
+--ve výpisu je Kamila Smutná
+
+--a SK Solnice 
+exec Hostování_Mateřský_Klub 'SK Solnice'
+--ve výpisu je Anna Kutinová
 
 --Test funkcí
 
