@@ -2,9 +2,9 @@ module MainBrick(mainBrick) where
 
 import Brick
 import qualified Brick.Types as T
-import Brick.Util (bg, fg, on)
-import Brick.Widgets.Border (border)
-import Brick.Widgets.Center (center)
+import Brick.Util(bg, fg, on)
+import Brick.Widgets.Border(border)
+import Brick.Widgets.Center(center)
 import Brick.BChan
 import qualified Graphics.Vty as V
 import qualified Graphics.Vty.Attributes as Color
@@ -24,21 +24,23 @@ data Tick = Tick
 
 {- this is for creating the initial state -}
 initState :: ScreenState
-initState = ScreenState { curPos = (0, 0)
-                        , curHighlighted = True
-                        , cells = empty
-                        , width = defaultWidth 
-                        , height = defaultHeight
+initState = ScreenState { _curPos = (0, 0)
+                        , _curHighlighted = True
+                        , _cells = empty
+                        , _width = defaultWidth 
+                        , _height = defaultHeight
+                        , _writer = DummyWriter
+                        , _reader = DummyReader
                         }
 
 putWriterReader :: Writer -> Reader -> ScreenState -> ScreenState
-putWriterReader w r s = s { writer = w, reader = r}
+putWriterReader w r s = s & writer .~ w & reader .~ r
 
 sendMsg :: ScreenState -> String -> IO ()
-sendMsg s = write (writer s)
+sendMsg s = write $ s ^. writer
 
 receiveMsg :: ScreenState -> IO (Maybe String)
-receiveMsg s = lastMsg (reader s) 
+receiveMsg s = lastMsg $ s ^. reader
 
 quitBricks :: ScreenState -> EventM () (Next ScreenState)
 quitBricks s = liftIO (sendMsg s "quit") >> halt s
@@ -56,8 +58,8 @@ mainLayer s =
   border $
   foldr1
     (<+>)
-    [ line2widget s [(x, y) | y <- [0 .. height s - 1]]
-    | x <- [0 .. width s - 1]
+    [ line2widget s [(x, y) | y <- [0 .. s ^. height - 1]]
+    | x <- [0 .. s ^. width - 1]
     ]
 
 line2widget :: ScreenState -> [Pos] -> Widget n
@@ -66,11 +68,11 @@ line2widget s xs = foldr1 (<=>) $ map (pos2widget s) xs
 pos2widget :: ScreenState -> Pos -> Widget n
 pos2widget s pos
   | isAlive s pos =
-    if curHighlighted s && pos == curPos s
+    if s ^. curHighlighted && pos == s ^. curPos
       then withAttr cursorHl $ str "X"
       else str "X"
   | otherwise =
-    if curHighlighted s && pos == curPos s
+    if s ^. curHighlighted && pos == s ^. curPos
       then withAttr cursorHl $ str " "
       else str " "
 
@@ -95,7 +97,7 @@ handleEvent s (AppEvent Tick) = do
                                 msgM <- liftIO $ receiveMsg s
                                 case words <$> msgM of 
                                   Just ws -> if head ws == "board" then
-                                                  continue $ s { cells = conv s $ ws !! 1 }
+                                                  continue $ s & cells .~ conv s (ws!!1)
                                              else continue s
                                   Nothing -> continue s
 
@@ -111,10 +113,9 @@ handleEvent s (T.VtyEvent (V.EvKey k [])) =
     V.KChar 'j' -> move D s
     V.KChar 'k' -> move U s
     V.KChar 'l' -> move R s
-    V.KChar 'v' -> continue $ s {curHighlighted = not (curHighlighted s)}
+    V.KChar 'v' -> continue $ s & curHighlighted %~ not
     V.KChar 'x' -> do
-                   let pos = map show $ (\(x,y) -> [x,y]) $ curPos s
-                   liftIO . sendMsg s $ "flip " ++ pos!!0 ++ " " ++ pos!!1
+                   liftIO . sendMsg s $ "flip " ++ show (s ^. curPosX) ++ " " ++ show (s ^. curPosY)
                    continue s
 
     V.KChar ' ' -> liftIO (sendMsg s "step") >> continue s
@@ -123,14 +124,16 @@ handleEvent s (T.VtyEvent (V.EvKey k [])) =
 handleEvent s _ = continue s --also ignore all other events
 
 move :: Dir -> ScreenState -> EventM () (Next ScreenState)
-move d s
-  | d == L = continue $ s {curPos = (max 0 (x - 1), y)}
-  | d == R = continue $ s {curPos = (min (width s - 1) (x + 1), y)}
-  | d == U = continue $ s {curPos = (x, max 0 (y - 1))}
-  | d == D = continue $ s {curPos = (x, min (height s - 1) (y + 1))}
+move d s  
+     | d == L = continue $ s & curPosX .~ max 0 (x - 1)
+     | d == R = continue $ s & curPosX .~ min w1 (x + 1)
+     | d == U = continue $ s & curPosY .~ max 0 (y - 1)
+     | d == D = continue $ s & curPosY .~ min h1 (y + 1)
   where
-    x = fst $ curPos s
-    y = snd $ curPos s
+    x = s ^. curPos . _1
+    y = s ^. curPos . _2
+    w1 = s ^. width - 1
+    h1 = s ^. height - 1
 
 {- This constructs the Brick app from the available functions -}
 app :: App ScreenState Tick ()
@@ -153,16 +156,16 @@ mainBrick sck = do
        chan <- newBChan 10
        timerTId <- forkIO . forever $ do
                                       writeBChan chan Tick
-                                      threadDelay 10000 --10ms
+                                      threadDelay 100000 --100ms
 
        initVty <- V.mkVty V.defaultConfig
        E.bracket
-          (do 
+          (do --acquire resources
            w <- initWriter h
            rInf <- initReader h
            return (w,rInf)
           )
-          (\(w,rInf) -> do 
+          (\(w,rInf) -> do --release resources
                         killThread timerTId 
                         stopWriter w 
                         killThread $ snd rInf 

@@ -1,13 +1,13 @@
-module Writer(Writer
-           , initWriter
-           , write
-           , stopWriter) where
+module Writer(Writer(DummyWriter)
+            , initWriter
+            , write
+            , stopWriter) where
 
 import Control.Concurrent
 import Control.Concurrent.MVar(MVar)
 import System.IO(Handle, hPutStr, hFlush)
 
-newtype Writer = Writer (MVar WriteCmd)
+data Writer = Writer (MVar WriteCmd) | DummyWriter
 data WriteCmd = Message String | Stop (MVar ())
 
 initWriter :: Handle -> IO Writer

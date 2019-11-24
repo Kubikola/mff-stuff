@@ -1,3 +1,5 @@
+{-# LANGUAGE TemplateHaskell #-}
+
 module GameTypes
   ( Pos
   , ScreenState(..)
@@ -6,9 +8,23 @@ module GameTypes
   , defaultHeight
   , module Writer
   , module Reader
+  , module Lens.Micro
+  , module Lens.Micro.TH
+  , curPos
+  , curHighlighted
+  , cells
+  , width
+  , height
+  , writer
+  , reader
+  , curPosX
+  , curPosY
   ) where
 
 import Data.Set
+import Lens.Micro
+import Lens.Micro.TH
+
 import Writer
 import Reader
 
@@ -30,20 +46,29 @@ data ScreenState =
   ScreenState
     -- (0,0) top left
     -- (width-1, height-1) bottom right
-    { curPos :: Pos
+    { _curPos :: Pos
     -- key 'v' toggles highlighting
-    , curHighlighted :: Bool
+    , _curHighlighted :: Bool
     -- position of living cells
-    , cells :: Set Pos
+    , _cells :: Set Pos
     -- board width
-    , width :: Int
+    , _width :: Int
     -- board height
-    , height :: Int
+    , _height :: Int
     -- network writer
-    , writer :: Writer
+    , _writer :: Writer
     -- network reader
-    , reader :: Reader
+    , _reader :: Reader
     }
+
+makeLenses ''ScreenState
+
+curPosX :: Functor f => (Int -> f Int) -> ScreenState -> f ScreenState
+curPosX = curPos . _1
+
+curPosY :: Functor f => (Int -> f Int) -> ScreenState -> f ScreenState
+curPosY = curPos . _2
+
 
 -- Dir = Direction
 -- L = Left, ..., D = Down

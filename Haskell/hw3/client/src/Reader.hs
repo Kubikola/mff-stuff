@@ -1,12 +1,12 @@
-module Reader(Reader
-           , initReader
-           , lastMsg) where
+module Reader(Reader(DummyReader)
+            , initReader
+            , lastMsg) where
 
 import Control.Concurrent
 import Control.Concurrent.MVar(MVar)
 import System.IO(Handle, hGetLine)
 
-newtype Reader = Reader (MVar String)
+data Reader = Reader (MVar String) | DummyReader
 
 initReader :: Handle -> IO (Reader, ThreadId)
 initReader h = do
