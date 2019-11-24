@@ -25,8 +25,8 @@ import Data.Set
 import Lens.Micro
 import Lens.Micro.TH
 
-import Writer
 import Reader
+import Writer
 
 type Pos = (Int, Int)
 
@@ -69,7 +69,6 @@ curPosX = curPos . _1
 curPosY :: Functor f => (Int -> f Int) -> ScreenState -> f ScreenState
 curPosY = curPos . _2
 
-
 -- Dir = Direction
 -- L = Left, ..., D = Down
 -- used for moving cursor in move function in module Main
@@ -78,4 +77,4 @@ data Dir
   | R
   | U
   | D
-  deriving Eq
+  deriving (Eq)

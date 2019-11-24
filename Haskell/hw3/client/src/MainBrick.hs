@@ -1,37 +1,42 @@
-module MainBrick(mainBrick) where
+module MainBrick
+  ( mainBrick
+  ) where
 
 import Brick
-import qualified Brick.Types as T
-import Brick.Util(bg, fg, on)
-import Brick.Widgets.Border(border)
-import Brick.Widgets.Center(center)
 import Brick.BChan
+import qualified Brick.Types as T
+import Brick.Util (bg, fg, on)
+import Brick.Widgets.Border (border)
+import Brick.Widgets.Center (center)
+import Control.Concurrent (forkIO, killThread, threadDelay)
+import qualified Control.Exception as E
+import Control.Monad (forever, void)
+import Control.Monad.IO.Class (liftIO)
+import Data.Maybe (fromJust)
+import Data.Set (empty)
 import qualified Graphics.Vty as V
 import qualified Graphics.Vty.Attributes as Color
 import Network.Socket
-import Control.Monad.IO.Class (liftIO)
-import qualified Control.Exception as E
-import Control.Monad(forever, void)
-import Control.Concurrent(killThread, threadDelay, forkIO)
-import Data.Maybe(fromJust)
 import System.IO
-import Data.Set(empty)
 
 import Game
 import GameTypes
 
-data Tick = Tick
+data Tick =
+  Tick
 
 {- this is for creating the initial state -}
 initState :: ScreenState
-initState = ScreenState { _curPos = (0, 0)
-                        , _curHighlighted = True
-                        , _cells = empty
-                        , _width = defaultWidth 
-                        , _height = defaultHeight
-                        , _writer = DummyWriter
-                        , _reader = DummyReader
-                        }
+initState =
+  ScreenState
+    { _curPos = (0, 0)
+    , _curHighlighted = True
+    , _cells = empty
+    , _width = defaultWidth
+    , _height = defaultHeight
+    , _writer = DummyWriter
+    , _reader = DummyReader
+    }
 
 putWriterReader :: Writer -> Reader -> ScreenState -> ScreenState
 putWriterReader w r s = s & writer .~ w & reader .~ r
@@ -94,13 +99,13 @@ cursorHl = attrName "cursorHl"
  -}
 handleEvent :: ScreenState -> BrickEvent () Tick -> EventM () (Next ScreenState)
 handleEvent s (AppEvent Tick) = do
-                                msgM <- liftIO $ receiveMsg s
-                                case words <$> msgM of 
-                                  Just ws -> if head ws == "board" then
-                                                  continue $ s & cells .~ conv s (ws!!1)
-                                             else continue s
-                                  Nothing -> continue s
-
+  msgM <- liftIO $ receiveMsg s
+  case words <$> msgM of
+    Just ws ->
+      if head ws == "board"
+        then continue $ s & cells .~ conv s (ws !! 1)
+        else continue s
+    Nothing -> continue s
 handleEvent s (T.VtyEvent (V.EvKey k [])) =
   case k of
     V.KEsc -> quitBricks s
@@ -115,20 +120,19 @@ handleEvent s (T.VtyEvent (V.EvKey k [])) =
     V.KChar 'l' -> move R s
     V.KChar 'v' -> continue $ s & curHighlighted %~ not
     V.KChar 'x' -> do
-                   liftIO . sendMsg s $ "flip " ++ show (s ^. curPosX) ++ " " ++ show (s ^. curPosY)
-                   continue s
-
+      liftIO . sendMsg s $ "flip " ++ show (s ^. curPosX) ++ " " ++
+        show (s ^. curPosY)
+      continue s
     V.KChar ' ' -> liftIO (sendMsg s "step") >> continue s
-                 
     _ -> continue s --ignore all other keys
 handleEvent s _ = continue s --also ignore all other events
 
 move :: Dir -> ScreenState -> EventM () (Next ScreenState)
-move d s  
-     | d == L = continue $ s & curPosX .~ max 0 (x - 1)
-     | d == R = continue $ s & curPosX .~ min w1 (x + 1)
-     | d == U = continue $ s & curPosY .~ max 0 (y - 1)
-     | d == D = continue $ s & curPosY .~ min h1 (y + 1)
+move d s
+  | d == L = continue $ s & curPosX .~ max 0 (x - 1)
+  | d == R = continue $ s & curPosX .~ min w1 (x + 1)
+  | d == U = continue $ s & curPosY .~ max 0 (y - 1)
+  | d == D = continue $ s & curPosY .~ min h1 (y + 1)
   where
     x = s ^. curPos . _1
     y = s ^. curPos . _2
@@ -150,26 +154,31 @@ app =
 {- main just starts Brick main and discards (using void) the final state -}
 mainBrick :: Socket -> IO ()
 mainBrick sck = do
-       h <- socketToHandle sck ReadWriteMode
-       hSetBuffering h (BlockBuffering Nothing) --we will flush manually
-
-       chan <- newBChan 10
-       timerTId <- forkIO . forever $ do
-                                      writeBChan chan Tick
-                                      threadDelay 100000 --100ms
-
-       initVty <- V.mkVty V.defaultConfig
-       E.bracket
-          (do --acquire resources
-           w <- initWriter h
-           rInf <- initReader h
-           return (w,rInf)
-          )
-          (\(w,rInf) -> do --release resources
-                        killThread timerTId 
-                        stopWriter w 
-                        killThread $ snd rInf 
-                        hClose h
-          )
-          (\(w,rInf) -> void $ customMain initVty (V.mkVty V.defaultConfig) (Just chan) app (putWriterReader w (fst rInf) initState)
-          )
+  h <- socketToHandle sck ReadWriteMode
+  hSetBuffering h (BlockBuffering Nothing) --we will flush manually
+  chan <- newBChan 10
+  timerTId <-
+    forkIO . forever $ do
+      writeBChan chan Tick
+      threadDelay 100000 --100ms
+  initVty <- V.mkVty V.defaultConfig
+  E.bracket
+              --acquire resources
+    (do w <- initWriter h
+        rInf <- initReader h
+        return (w, rInf))
+    (\(w, rInf)
+         --release resources
+      -> do
+       killThread timerTId
+       stopWriter w
+       killThread $ snd rInf
+       hClose h)
+    (\(w, rInf) ->
+       void $
+       customMain
+         initVty
+         (V.mkVty V.defaultConfig)
+         (Just chan)
+         app
+         (putWriterReader w (fst rInf) initState))
