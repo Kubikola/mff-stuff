@@ -44,7 +44,7 @@ namespace _093animation
       fps  = 25.0;
 
       // Specific animation params.
-      param = "bush, gen=6, lineLength=0.1, speed=1.5";
+      param = "bush, gen=6, lineLength=0.01, speed=0";
 
       // Tooltip = help.
       tooltip = "[koch|kochAnti|kochQuadratic|tree|binTree|flower|bush|fern|islandsAndLakes|map|brokenWindow|dragon|levyCCurve|sierpinski], gen=<int>, lineLength=<float>, speed=<int>, antialiasing=<bool>";
@@ -145,7 +145,9 @@ namespace _093animation
     //  c.Clear(Color.FromArgb(149,89,255));
 //  c.Clear(Color.FromArgb(80,14,255));
    // c.Clear(Color.FromArgb(37,0,255));
-   c.Clear(Color.FromArgb(0,0,65));
+
+      //c.Clear(Color.FromArgb(0,0,65));
+      c.Clear(Color.FromArgb(179,109,144));
       c.SetAntiAlias(antialiasing);
 
       if (koch)
