@@ -1,6 +1,11 @@
 <?php
 require_once('db.php');
 
+//start the session
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 /**
  * Generates datalist for items autocompletion.
  *
@@ -26,7 +31,7 @@ function generate_form() : String {
                     'Item:' .
                     '<input list="items" name="item" placeholder="potatoes" required><br>' . 
                     'Amount:' .
-                    '<input type="number" min="1" name="amount" placeholder="3" required><br>' .
+                    '<input type="number" min="1" name="amount" placeholder="1"><br>' .
                     '<button class="btn okBtn" type="submit">Add</button>';
     $out .= generate_datalist();
     $out .= '</form></div>';
@@ -107,11 +112,23 @@ function update_on_cart(int $id, int $amount) : Bool {
     return $stmt->rowCount() === 1;
 }
 
+/**
+ * Validates given parameter.
+ *
+ * @param int $amount to validate
+ *
+ * @return void
+ */
+function validateAmount(int $amount) {
+    if($amount < 1) {
+        throw new InvalidArgumentException('Invalid amount');
+    }
+}
 
 /**
  * Deletes an item given by Id from DB.
  *
- * @param  int $id Id of an item to remove from DB.
+ * @param int $id Id of an item to remove from DB.
  *
  * @return void
  */
@@ -121,32 +138,49 @@ function delete_item(int $id) {
     $stmt->execute();
 }
 
+/**
+ * Saves an error message to the session that will be displayed to the client. 
+ *
+ * @param string $msg Error message that should be displayed to client.
+ *
+ * @return void
+ */
+function show_err_box(string $msg) {
+    $_SESSION['err'] = $msg;
+}
+
 echo("<h3>Add Item</h3>");
 echo(generate_form());
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' and isset($_POST['item']) and isset($_POST['amount'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' and isset($_POST['item'])) {
     $id = item2id($_POST['item']);
+    $amount = !isset($_POST['amount']) ? 1 : $_POST['amount'];
     if($id === null) { //add new item do db, add it to cart
        $id = insert_item($_POST['item']);
        try {
-            insert_into_cart($id, $_POST['amount']);
+            validateAmount($amount);
+            insert_into_cart($id, $amount);
        }
-       catch(TypeError $e) {
+       catch(Exception $e) {
            delete_item($id);
            error_log('Attempt to insert an item with invalid amount.');
+           show_err_box('Error: Item not added!');
        }
     }
     else { //add/update existing item on cart
         try {
-            if(!update_on_cart($id, $_POST['amount'])) {
-                insert_into_cart($id, $_POST['amount']);
+            validateAmount($amount);
+            if(!update_on_cart($id, $amount)) {
+                insert_into_cart($id, $amount);
             }
         }
-        catch(TypeError $e) {
+        catch(Exception $e) {
             delete_item($id);
             error_log('Attempt to insert an item with invalid amount.');
+            show_err_box('Error: Item not added!');
         }
     }
 header('Location: index.php');
+exit();
 }
 ?>

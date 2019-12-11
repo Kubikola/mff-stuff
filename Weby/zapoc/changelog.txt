@@ -1,0 +1,12 @@
+Placeholdery jsou nyní lépe odlišitelné od uživatelem vyplněných dat.
+    ::placeholder {
+        color: #A9A9A9;
+    }
+
+Amount nyní není required, pokud amount není vyplněn při přidání nové položky, na serveru se doplní 1.
+
+Na server side nově kontrola, aby amount > 0 (u přidání i editace položky).
+Opraven alert, který oznamuje, že editace neproběhla úspěšně.
+
+Přidán error box zobrazující neúspěch odeslání formuláře (při přidání nové položky do košíku).
+    - Server si do $_SESSION uloží error message, ten pak zobrazí v danger boxu.

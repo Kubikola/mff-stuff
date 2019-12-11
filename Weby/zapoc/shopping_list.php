@@ -1,6 +1,11 @@
 <?php
 require_once('db.php');
 
+//start the session
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 /**
  * Fetches the shopping list from DB.
  *
@@ -69,6 +74,37 @@ function display_cart() {
         ++$i;
     }
     echo('</table>');
+}
+
+/**
+ * Determines whether we should display an error.
+ *
+ * @return Bool indicating whether we should display an error.
+ */
+function should_display_err() : Bool {
+    return (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['err']));
+}
+
+
+/**
+ * Displays an error message to the client.
+ *
+ * @param string $err_msg Message to display to a client.
+ *
+ * @return void
+ */
+function display_err(string $err_msg) {
+    echo('<div class="alert">');
+        echo('<span class="closebtn">&times;</span>');
+        echo($err_msg);
+    echo('</div>');
+    
+    unset($_SESSION['err']);
+
+}
+
+if(should_display_err()) {
+    display_err($_SESSION['err']);
 }
 display_cart();
 ?>

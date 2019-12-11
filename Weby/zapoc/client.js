@@ -14,6 +14,11 @@ window.onload = function() {
     for(var i = 0; i < swapbtns.length; ++i) {
         swapbtns[i].addEventListener('click', swapBtnOnClick, false);
     }
+
+    var dangerCloseBtns = document.getElementsByClassName('closebtn');
+    for(var i = 0; i < dangerCloseBtns.length; ++i) {
+        dangerCloseBtns[i].addEventListener('click', dangerCloseBtnOnClick, false);
+    }
 }
 
 //Request to delete an item from the shopping list.
@@ -104,8 +109,11 @@ Uses AJAX
 function okBtnOnClick() {
     var id = this.getAttribute('data-id');
     var amountEl = document.getElementById('amount-' + id);
-    var oldVal = document.getElementById('act-' + id).innerText;
-    if(amountEl.checkValidity() && oldVal !== amountEl.value) {
+    var el = document.getElementById('act-' + id);
+    if(el !== null) {
+        var oldVal = document.getElementById('act-' + id).innerText;
+    }
+    if(amountEl !== null && amountEl.checkValidity() && oldVal !== amountEl.value) {
         httpRequest = new XMLHttpRequest()
         httpRequest.open('POST', 'edit_amount.php', true);
         httpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -130,8 +138,11 @@ function okBtnOnClick() {
         }
         httpRequest.send('item_id=' + id + '&new_amount=' + amountEl.value);
     }
-    else if (oldVal === amountEl.value) {
+    else if (amountEl !== null && oldVal === amountEl.value) {
         document.getElementById('cnc-'+ id).click();
+    }
+    else {
+        alert('Edit failed, try again.')
     }
 }
 
@@ -215,4 +226,9 @@ function swapBtnOnClick() {
         }
     }
     httpRequest.send('prev_id=' + prevId + '&next_id=' + nextId);
+}
+
+//Request to close an error message box.
+function dangerCloseBtnOnClick() {
+    this.parentElement.style.display = 'none';
 }
