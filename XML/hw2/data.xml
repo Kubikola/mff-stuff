@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE football SYSTEM "data.dtd">
+<football>
+
+	<people>
+		<person id="per1">
+			<first-name>Josef</first-name>
+			<last-name>Balcar</last-name>
+			<contact>
+				<email>jaroslav.balcar@seznam.cz</email>
+				<telephone>
+					<prefix>+420</prefix>
+					<suffix>775948271</suffix>
+				</telephone>
+			</contact>
+		</person>
+		<person id="per2">
+			<first-name>Jan</first-name>
+			<last-name>Adámek</last-name>
+			<contact>
+				<email>jan.adamek@email.cz</email>
+				<email>janadamek@centrum.cz</email>
+				<telephone>
+					<prefix>+421</prefix>
+					<suffix>603489145</suffix>
+				</telephone>
+			</contact>
+		</person>
+		<person id="per3">
+			<first-name>Jaroslav</first-name>
+			<last-name>Dvořák</last-name>
+			<contact>
+				<telephone>
+					<prefix>+420</prefix>
+					<suffix>893329481</suffix>
+				</telephone>
+				<telephone>
+					<prefix>+421</prefix>
+					<suffix>347849354</suffix> 
+				</telephone>
+			</contact>
+		</person>
+	</people>
+
+	<clubs>
+		<club id="cl1">
+			<name>SK Babí&org-type;</name>
+			<motto since="2012">
+				<!-- escaping double quotes -->
+				<![CDATA[
+				"Hrát fotbal je velmi jednoduché. Ale hrát jednoduchý fotbal, to je jedna z nejtěžších věcí na světě." — Johan Cruijff
+				]]>
+			</motto>
+			<address>
+				<street>Broumovská</street>
+				<number>350</number>
+				<town>Náchod</town>
+				<postcode>547 01</postcode>
+			</address>
+			<possessions>
+				<owned-stadion refId="st1" />
+				traktor
+			</possessions>
+		</club>
+		<club id="cl2">
+			<name>TJ Velké Pořičí&org-type;</name>
+			<motto since="2002">
+				&quot;Rok <?php echo date("Y"); ?> bude pro nás ten nejlepší&quot; — kapitán mužstva
+			</motto>
+			<address>
+				<street>Náměstí</street>
+				<number>320</number>
+				<town>Velké Pořičí</town>
+				<postcode>549 32</postcode>
+			</address>
+			<possessions>
+				<owned-stadion refId="st2" />
+				<owned-stadion refId="st3" />
+				parkoviště
+			</possessions>
+		</club>
+	</clubs>
+	
+	<stadions>
+		<surfaces>
+			<surface id="sf1">umělý trávník</surface>
+			<surface id="sf2">živý trávník</surface>
+		</surfaces>
+		<stadion id="st1" surface="sf1">
+			<address>
+				<street>Příkopy</street>
+				<number>1186</number>
+				<town>Náchod</town>
+				<postcode>547 01</postcode>
+			</address>
+		</stadion>
+		<stadion id="st2" surface="sf2">
+			<address>
+				<street>Náchodská</street>
+				<number>393</number>
+				<town>Velké Pořičí</town>
+				<postcode>549 32</postcode>
+			</address>
+		</stadion>
+		<stadion id="st3" surface="sf2">
+			<address>
+				<street>Kostelecká</street>
+				<number>151</number>
+				<town>Malé Pořičí</town>
+				<postcode>549 31</postcode>
+			</address>
+		</stadion>
+	</stadions>
+	
+	<players>
+		<genders>
+			<gender id="m">mužské</gender>
+			<gender id="f">ženské</gender>
+		</genders>
+		<categories>
+			<category id="cat1">žáci<category id="cat11">mladší</category><category id="cat12">starší</category></category>
+<category id="cat2">dorost<category id="cat21">mladší</category><category id="cat22">starší</category></category>
+			<category id="cat3">muži</category>
+			<category id="cat4">přípravka<category id="cat41">mladší</category><category id="cat42">starší</category></category>
+			<category id="cat5">ženy</category><category id="cat6">žákyně<category id="cat61">mladší</category><category id="cat62">starší</category></category>
+			<category id="cat7">předpřípravka</category>
+			<category id="cat8">důchodci<category id="cat81">65+</category><category id="cat82">70+</category></category>
+			<category id="cat9">důchodkyně<category id="cat91">65+</category><category id="cat92">70+</category></category>
+			<category id="cat10">dorostenky<category id="cat101">mladší</category><category id="cat102">starší</category></category>
+		</categories>
+		<player person="per2" category="cat1" gender="m" club="cl1">
+			<reg-num format="old">594220</reg-num>
+		</player>
+	</players>
+</football>

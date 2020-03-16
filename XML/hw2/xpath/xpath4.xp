@@ -1,0 +1,4 @@
+(: Všechny osoby, které mají uvedené druhé telefonní číslo s jinou než českou předvolbou :)
+/football/people/person[
+	contact/telephone[2]/prefix != '+420'
+]

@@ -1,0 +1,66 @@
+<!ELEMENT football (people, clubs, stadions, players)>
+
+	<!ELEMENT people (person+)>
+		<!ELEMENT person (first-name, last-name, contact)>
+		<!ATTLIST person id ID #REQUIRED>
+		
+		<!ELEMENT first-name (#PCDATA)>
+		<!ELEMENT last-name (#PCDATA)>
+		
+		<!ELEMENT contact (email?, email?, telephone, telephone?)>
+			<!ELEMENT email (#PCDATA)>
+			<!ELEMENT telephone (prefix, suffix)>
+				<!ELEMENT prefix (#PCDATA)>
+				<!ELEMENT suffix (#PCDATA)>
+	
+	<!ELEMENT clubs (club+)>
+		<!ELEMENT club (name, motto?, address, possessions?)>
+		<!ATTLIST club id ID #REQUIRED>
+			<!ELEMENT name (#PCDATA)>
+			<!ELEMENT motto (#PCDATA)>
+			<!ATTLIST motto since CDATA #IMPLIED>
+			<!-- address --> 
+			<!ELEMENT possessions (#PCDATA | owned-stadion)*>
+				<!ELEMENT owned-stadion EMPTY>
+				<!ATTLIST owned-stadion refId IDREF #REQUIRED>
+		
+	
+	<!ELEMENT stadions (surfaces, stadion+)>
+		<!ELEMENT surfaces (surface+)>
+			<!ELEMENT surface (#PCDATA)>
+			<!ATTLIST surface id ID #REQUIRED>
+		
+		<!ELEMENT stadion (address)>
+		<!ATTLIST stadion 
+			id ID #REQUIRED 
+			surface IDREF #REQUIRED>
+		<!-- address -->
+	
+	
+	<!ELEMENT players (genders, categories, player+)>
+		<!ELEMENT genders (gender+)>
+			<!ELEMENT gender (#PCDATA)>
+			<!ATTLIST gender id ID #REQUIRED>
+		<!ELEMENT categories (category+)>
+			<!ELEMENT category (#PCDATA | category)*>
+			<!ATTLIST category id ID #REQUIRED>
+			
+		<!ELEMENT player (reg-num)>
+		<!ATTLIST player 
+			person IDREF #REQUIRED
+			category IDREF #REQUIRED
+			gender IDREF #REQUIRED
+			club IDREF #REQUIRED>
+			
+			<!ELEMENT reg-num (#PCDATA)>
+			<!ATTLIST reg-num format (new|old) "new">
+	
+	
+	
+<!ELEMENT address (street, number, town, postcode)>
+	<!ELEMENT street (#PCDATA)>
+	<!ELEMENT number (#PCDATA)>
+	<!ELEMENT town (#PCDATA)>
+	<!ELEMENT postcode (#PCDATA)>
+	
+<!ENTITY org-type ", z.s.">
