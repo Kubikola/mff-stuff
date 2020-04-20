@@ -1,0 +1,5 @@
+(: Všechny osoby, které mají uvedený alespoň jedno telefonní číslo
+   a žádný email :)
+/football/people/person[
+	not(contact/email) and contact/telephone
+]

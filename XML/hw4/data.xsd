@@ -1,0 +1,380 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" attributeFormDefault="unqualified">
+<xs:element name="football">
+	<xs:complexType>
+		<xs:sequence>
+			<xs:element name="people">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="person" type="TPerson" minOccurs="1" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="clubs">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="club" type="TClub" minOccurs="1" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="stadions">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="surfaces">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="surface" type="TSurface" minOccurs="1" maxOccurs="unbounded"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="stadion" type="TStadion" minOccurs="1" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			
+			<xs:element name="players">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="genders">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="gender" type="TGender" minOccurs="1" maxOccurs="unbounded"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						
+						<xs:element name="categories">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="category" type="TCategory" minOccurs="1" maxOccurs="unbounded"/>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+
+						<xs:element name="player" type="TPlayer" minOccurs="1" maxOccurs="unbounded"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+		
+	<xs:key name="PK_Person">
+		<xs:selector xpath="people/person"/>
+		<xs:field xpath="@id"/>
+	</xs:key>
+	
+	<xs:key name="PK_Club">
+		<xs:selector xpath="clubs/club"/>
+		<xs:field xpath="@id"/>
+	</xs:key>
+	
+	<xs:key name="PK_Surface">
+		<xs:selector xpath="stadions/surfaces/surface"/>
+		<xs:field xpath="@id"/>
+	</xs:key>
+	
+	<xs:key name="PK_Stadion">
+		<xs:selector xpath="stadions/stadion"/>
+		<xs:field xpath="@id"/>
+	</xs:key>
+	
+	<xs:key name="PK_Gender">
+		<xs:selector xpath="players/genders/gender"/>
+		<xs:field xpath="@id"/>
+	</xs:key>
+	
+	<xs:keyref name="FK_Possessions_Stadion" refer="PK_Stadion">
+		<xs:selector xpath="clubs/club/possessions/owned-stadion"/>
+		<xs:field xpath="@refId"/>
+	</xs:keyref>
+
+	<xs:keyref name="FK_Stadion_Surface" refer="PK_Surface">
+		<xs:selector xpath="stadions/stadion"/>
+		<xs:field xpath="@surface"/>
+	</xs:keyref>
+
+	<xs:keyref name="FK_Player_Person" refer="PK_Person">
+		<xs:selector xpath="players/player"/>
+		<xs:field xpath="@person"/>
+	</xs:keyref>
+	
+	<xs:keyref name="FK_Player_Gender" refer="PK_Gender">
+		<xs:selector xpath="players/player"/>
+		<xs:field xpath="@gender"/>
+	</xs:keyref>
+	
+	<xs:keyref name="FK_Player_Club" refer="PK_Club">
+		<xs:selector xpath="players/player"/>
+		<xs:field xpath="@club"/>
+	</xs:keyref>
+	
+</xs:element>
+
+
+
+
+
+
+<xs:simpleType name="TName">
+	<xs:restriction base="xs:string">
+		<xs:pattern value="[^\W\d_]+"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="TPerson">
+	<xs:sequence>
+		<xs:element name="first-name" type="TName"/>
+		
+		<xs:element name="last-name" type="TName"/>
+		
+		<xs:element name="contact">
+			<xs:complexType>
+				<xs:sequence>
+					<xs:element name="email" minOccurs="0" maxOccurs="2">
+						<xs:simpleType>
+							<xs:restriction base="xs:string">
+								<xs:pattern value="[^@]+@[^@]+\.[^@]+"/>
+							</xs:restriction>
+						</xs:simpleType>
+					</xs:element>
+					<xs:element name="telephone" minOccurs="1" maxOccurs="2">
+						<xs:complexType>
+							<xs:sequence>
+								<xs:element name="prefix">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:pattern value="\+[0-9]{2,3}"/>
+									</xs:restriction>
+								</xs:simpleType>
+								</xs:element>
+								
+								<xs:element name="suffix">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:pattern value="[0-9]{9}"/>
+									</xs:restriction>
+								</xs:simpleType>
+								</xs:element>
+							</xs:sequence>
+						</xs:complexType>
+					</xs:element>
+				</xs:sequence>
+			</xs:complexType>
+		</xs:element>
+	</xs:sequence>
+	<xs:attribute name="id" use="required" type="TPersonId"/>
+</xs:complexType>
+
+<xs:simpleType name="TPersonId">
+	<xs:restriction base="xs:ID">
+			<xs:pattern value="per[0-9]+"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="TPersonRefId">
+	<xs:restriction base="xs:IDREF">
+			<xs:pattern value="per[0-9]+"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:simpleType name="TClubId">
+	<xs:restriction base="xs:ID">
+		<xs:pattern value="cl[0-9]+"/>
+	</xs:restriction>	
+</xs:simpleType>
+
+<xs:simpleType name="TClubRefId">
+	<xs:restriction base="xs:IDREF">
+		<xs:pattern value="cl[0-9]+"/>
+	</xs:restriction>	
+</xs:simpleType>
+
+<xs:complexType name="TClub">
+	<xs:sequence>
+		<xs:element name="name" type="xs:string"/>
+		<xs:element name="motto">
+			<xs:complexType>
+				<xs:simpleContent>
+					<xs:extension base="xs:string">
+						<xs:attribute name="since" use="optional">
+							<xs:simpleType>
+								<xs:restriction base="xs:integer">
+									<xs:minInclusive value="1900"/>
+									<xs:maxInclusive value="2020"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:attribute>
+					</xs:extension>
+				</xs:simpleContent>
+			</xs:complexType>
+		</xs:element>
+		<xs:element ref="address"/>
+		<xs:element name="possessions" type="TPossessions"/>
+	</xs:sequence>
+	<xs:attribute name="id" type="TClubId" use="required"/>
+</xs:complexType>
+
+
+<xs:element name="address" type="TAddress"/>
+
+<xs:complexType name="TAddress">
+	<xs:sequence>
+		<xs:element name="street" type="xs:string"/>
+		<xs:element name="number" type="xs:integer"/>
+		<xs:element name="town" type="xs:string"/>
+		<xs:element name="postcode">
+			<xs:simpleType>
+				<xs:restriction base="xs:string">
+					<xs:pattern value="[0-9]{3} [0-9]{2}"/>
+				</xs:restriction>
+			</xs:simpleType>
+		</xs:element>
+	</xs:sequence>
+</xs:complexType>
+
+<xs:complexType name="TPossessions" mixed="true">
+	<xs:sequence>
+		<xs:element name="owned-stadion" maxOccurs="unbounded">
+		<xs:complexType>
+			<xs:attribute name="refId" use="required" type="TStadionRefId"/>
+		</xs:complexType>
+		</xs:element>
+	</xs:sequence>
+</xs:complexType>
+
+
+<xs:simpleType name="TSurfaceId">
+	<xs:restriction base="xs:ID">
+		<xs:pattern value="sf[0-9]+"/>
+	</xs:restriction>	
+</xs:simpleType>
+
+<xs:simpleType name="TSurfaceRefId">
+	<xs:restriction base="xs:IDREF">
+		<xs:pattern value="sf[0-9]+"/>
+	</xs:restriction>	
+</xs:simpleType>
+
+<xs:simpleType name="TStadionId">
+	<xs:restriction base="xs:ID">
+		<xs:pattern value="st[0-9]+"/>
+	</xs:restriction>	
+</xs:simpleType>
+
+<xs:simpleType name="TStadionRefId">
+	<xs:restriction base="xs:IDREF">
+		<xs:pattern value="st[0-9]+"/>
+	</xs:restriction>	
+</xs:simpleType>
+
+<xs:simpleType name="TCategoryId">
+	<xs:restriction base="xs:ID">
+		<xs:pattern value="cat[0-9]+"/>
+	</xs:restriction>	
+</xs:simpleType>
+
+<xs:simpleType name="TCategoryRefId">
+	<xs:restriction base="xs:IDREF">
+		<xs:pattern value="cat[0-9]+"/>
+	</xs:restriction>	
+</xs:simpleType>
+
+<xs:complexType name="TSurface">
+	<xs:simpleContent>
+		<xs:extension base="xs:string">
+			<xs:attribute name="id" use="required">
+				<xs:simpleType>
+					<xs:restriction base="xs:ID">
+						<xs:pattern value="sf[0-9]+"/>
+					</xs:restriction>
+				</xs:simpleType>
+			</xs:attribute>
+		</xs:extension>
+	</xs:simpleContent>
+</xs:complexType>
+
+<xs:complexType name="TStadion">
+	<xs:sequence>
+		<xs:element ref="address"/>
+	</xs:sequence>
+	<xs:attribute name="id" use="required" type="TStadionId"/>
+	<xs:attribute name="surface" use="required" type="TSurfaceRefId"/>
+</xs:complexType>
+
+
+<xs:simpleType name="TGenderId">
+	<xs:list>
+		<xs:simpleType>
+			<xs:restriction base="xs:ID">
+			<xs:enumeration value="m"/>
+			<xs:enumeration value="f"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:list>
+</xs:simpleType>
+
+<xs:simpleType name="TGenderRefId">
+	<xs:list>
+		<xs:simpleType>
+			<xs:restriction base="xs:IDREF">
+			<xs:enumeration value="m"/>
+			<xs:enumeration value="f"/>
+			</xs:restriction>
+		</xs:simpleType>
+	</xs:list>
+</xs:simpleType>
+
+<xs:complexType name="TGender">
+	<xs:simpleContent>
+	<xs:extension base="xs:string">
+		<xs:attribute name="id" type="TGenderId" use="required"/>
+	</xs:extension>
+	</xs:simpleContent>
+</xs:complexType>
+
+<xs:complexType name="TCategory" mixed="true">
+	<xs:sequence>
+		<xs:element name="category" type="TCategory" minOccurs="0" maxOccurs="unbounded"/>
+	</xs:sequence>
+	<xs:attribute name="id" use="required" type="TCategoryId"/>
+</xs:complexType>
+
+<xs:simpleType name="Treg-num">
+	<xs:restriction base="xs:string">
+		<xs:pattern value="[0-9]{6,7}"/>
+	</xs:restriction>
+</xs:simpleType>
+
+<xs:complexType name="TPlayer">
+	<xs:sequence>
+		<xs:element name="reg-num">
+			<xs:complexType>
+			<xs:simpleContent>
+				<xs:extension base="Treg-num">
+					<xs:attribute name="format">
+						<xs:simpleType>
+							<xs:list>
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:enumeration value="old"/>
+										<xs:enumeration value="new"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:list>
+						</xs:simpleType>
+			</xs:attribute>
+				</xs:extension>
+			</xs:simpleContent>
+			</xs:complexType>
+		</xs:element>
+	</xs:sequence>
+	<xs:attribute name="person" use="required" type="TPersonRefId"/>
+	<xs:attribute name="category" use="required" type="TCategoryRefId"/>
+	<xs:attribute name="gender" use="required" type="TGenderRefId"/>
+	<xs:attribute name="club" use="required" type="TClubRefId"/>
+</xs:complexType>
+
+</xs:schema>

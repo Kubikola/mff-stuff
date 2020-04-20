@@ -1,0 +1,4 @@
+(: Všechny stadiony, jejichž povrch je z umělé trávy. :)
+/football/stadions/stadion[@surface = 
+	/football/stadions/surfaces/surface[text() = "umělý trávník"]/@id
+]

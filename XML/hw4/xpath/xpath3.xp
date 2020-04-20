@@ -1,0 +1,8 @@
+(: Všechny kluby, které vlastní alespoň 2 stadiony, jejichž povrch je vyroben z živého trávníku :)
+/football/clubs/club[
+	count(possessions/owned-stadion[@refId = 
+		/football/stadions/stadion[
+			@surface = /football/stadions/surfaces/surface[text() = "živý trávník"]/@id
+		]/@id
+	]) > 1
+]
