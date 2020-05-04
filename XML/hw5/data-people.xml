@@ -1,0 +1,20 @@
+<people>
+	<person id="per4">
+		<name>Jonathan Smith</name>
+		<telephone>
+			<prefix>+420</prefix>
+			<suffix>849674837</suffix>
+		</telephone>
+		<email>jon.smith@zenwaisoge.jp</email>
+	</person>
+	
+	<person id="per5">
+	<name>Michiko     
+	Takahashi</name>
+	<email>michiko.taka@nihon.jp</email>
+		<telephone>
+			<prefix>+420</prefix>
+			<suffix>568696452</suffix>
+		</telephone>
+	</person>
+</people>

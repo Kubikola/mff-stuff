@@ -1,0 +1,4 @@
+(: Jména všech hráčských kategorií,
+   vyžaduje XPath >= 2.0
+:)
+//category[not(category)]/string-join((ancestor::category/text(), text()), ' ')
